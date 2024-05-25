@@ -1,6 +1,10 @@
 package com.tt.becaria.service;
 
+import com.tt.becaria.model.Email;
+import com.tt.becaria.model.EmailRemitente;
+import com.tt.becaria.model.ResponseData;
+
 public interface EmailService {
-    boolean enviarCorreoDestinatario(String destinatario, String asunto, String contenido);
-    boolean enviarCorreo(String remitente, String contenido);
+    ResponseData enviarCorreoDestinatario(Email email);
+    ResponseData enviarCorreo(EmailRemitente email);
 }

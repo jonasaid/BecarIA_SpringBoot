@@ -1,95 +1,84 @@
 package com.tt.becaria.controller.impl;
 
 import com.tt.becaria.controller.EmailController;
-import com.tt.becaria.model.Email;
-import com.tt.becaria.model.EmailRemitente;
-import com.tt.becaria.model.ResponseData;
-import com.tt.becaria.service.impl.EmailServiceImpl;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
 
 /**
- * Esta clase es un controlador de endpoints relacionados con el envío de
- * correos electrónicos.
- * Proporciona un endpoint para enviar correos electrónicos utilizando el
- * controlador EmailServiceImpl.
+ * Esta clase es un controlador para el envío de correos electrónicos.
+ * Permite enviar correos electrónicos utilizando el servicio de envío de correo de Spring.
  */
-@RestController
-@CrossOrigin(origins = "http://localhost:8080")
+@Service
+@PropertySource("classpath:application.properties")
 public class EmailControllerImpl implements EmailController {
 
-    private final EmailServiceImpl emailServiceImpl;
+    private final JavaMailSender javaMailSender;
+
+    @Value("${spring.mail.username}")
+    private String correoDestinatario;
 
     /**
-     * Crea una instancia del controlador EmailControllerImpl con el
-     * EmailServiceImpl especificado.
+     * Crea una instancia del controlador EmailControllerImpl con el JavaMailSender especificado.
      *
-     * @param emailServiceImpl El EmailServiceImpl utilizado para enviar correos
-     *                         electrónicos.
+     * @param javaMailSender El JavaMailSender utilizado para enviar correos electrónicos.
      */
-    @Autowired
-    public EmailControllerImpl(EmailServiceImpl emailServiceImpl) {
-        this.emailServiceImpl = emailServiceImpl;
+    public EmailControllerImpl(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 
     /**
-     * Endpoint para enviar un correo electrónico.
-     * Recibe un objeto Email en el cuerpo de la solicitud y utiliza el
-     * EmailServiceImpl para enviar el correo electrónico.
+     * Envía un correo electrónico al destinatario especificado con el asunto y contenido dados.
      *
-     * @param email El objeto Email que contiene los datos del correo electrónico a
-     *              enviar.
-     *
-     * @return Un objeto ResponseData que contiene la respuesta de la solicitud.
-     *         Si se logra enviar el correo, se devuelve una respuesta con
-     *         estado "success", el código HTTP correspondiente y el objeto Email.
-     *         Si no se encuentran registros, se devuelve una respuesta con estado
-     *         "error", el código HTTP correspondiente y un mensaje de error.
-     *
+     * @param destinatario El destinatario del correo electrónico.
+     * @param asunto       El asunto del correo electrónico.
+     * @param contenido    El contenido del correo electrónico.
      */
-    @PostMapping("/enviar_correo_destinatario")
-    public ResponseData enviarCorreoDestinatario(@RequestBody Email email) {
-        // Obtener los datos del correo electrónico desde el cuerpo de la solicitud
-        // Enviar el correo electrónico
-        boolean success = emailServiceImpl.enviarCorreoDestinatario(email.getDestinatario(), email.getAsunto(), email.getContenido());
-        if (success) {
-            return new ResponseData("success", HttpStatus.CREATED.value(), email);
-        } else {
-            return new ResponseData("error", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "No se pudo enviar el correo.");
+    public boolean enviarCorreoDestinatario(String destinatario, String asunto, String contenido) {
+        try {
+            MimeMessage correo = javaMailSender.createMimeMessage();
+            // true para contenido multipart (HTML y texto)
+            MimeMessageHelper mensaje = new MimeMessageHelper(correo, true);
+            mensaje.setTo(destinatario);
+            mensaje.setSubject(asunto);
+            // true para interpretar el contenido como HTML
+            mensaje.setText(contenido, true);
+
+            javaMailSender.send(correo);
+            return true;
+        } catch (MailException e) {
+            return false;
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
         }
     }
 
     /**
-     * Endpoint para enviar un correo electrónico.
-     * Recibe un objeto EmailRemitente en el cuerpo de la solicitud y utiliza el
-     * EmailServiceImpl para enviar el correo electrónico.
+     * Envía un correo electrónico a el mail que esta configurado en application.properties con un asunto fijo y contenido dado.
      *
-     * @param email El objeto EmailRemitente que contiene los datos del correo electrónico a
-     *              enviar.
-     *
-     * @return Un objeto ResponseData que contiene la respuesta de la solicitud.
-     *         Si se logra enviar el correo, se devuelve una respuesta con
-     *         estado "success", el código HTTP correspondiente y el objeto EmailRemitente.
-     *         Si no se encuentran registros, se devuelve una respuesta con estado
-     *         "error", el código HTTP correspondiente y un mensaje de error.
-     *
+     * @param remitente    El remitente del correo electrónico.
+     * @param contenido    El contenido del correo electrónico.
      */
-    @PostMapping("/enviar_correo")
-    public ResponseData enviarCorreo(@RequestBody EmailRemitente email) {
-        // Obtener los datos del correo electrónico desde el cuerpo de la solicitud
-        // Enviar el correo electrónico
-        boolean success = emailServiceImpl.enviarCorreo(email.getRemitente(), email.getContenido());
-        if (success) {
-            return new ResponseData("success", HttpStatus.CREATED.value(), email);
-        } else {
-            return new ResponseData("error", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "No se pudo enviar el correo.");
+    public boolean enviarCorreo(String remitente, String contenido) {
+        try {
+            MimeMessage correo = javaMailSender.createMimeMessage();
+            // true para contenido multipart (HTML y texto)
+            MimeMessageHelper mensaje = new MimeMessageHelper(correo, true);
+            mensaje.setTo(correoDestinatario);
+            mensaje.setSubject("BecarIA");
+            mensaje.setText(contenido,true);
+
+            javaMailSender.send(correo);
+            return true;
+        } catch (MailException e) {
+            return false;
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

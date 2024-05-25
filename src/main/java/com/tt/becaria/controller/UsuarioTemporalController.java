@@ -1,11 +1,13 @@
 package com.tt.becaria.controller;
 
-import com.tt.becaria.model.ResponseData;
 import com.tt.becaria.model.UsuarioTemporal;
 
+import java.util.LinkedList;
+import java.util.Map;
+
 public interface UsuarioTemporalController {
-    ResponseData getAllUsuariosTemporales();
-    ResponseData getUsuarioById(int id);
-    ResponseData createUsuarioTemporal(UsuarioTemporal usuario);
-    ResponseData deleteUsuarioTemporal(int id);
+    boolean nuevoUsuarioTemporal(UsuarioTemporal usuario);
+    LinkedList<UsuarioTemporal> obtenerUsuariosTemporales(Map<String, Object> where, boolean isConsultaLike);
+
+    boolean eliminaUsuarioTemporal(UsuarioTemporal usuario);
 }

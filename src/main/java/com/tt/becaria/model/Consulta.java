@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data // Anotación de Lombok para generar automáticamente getters, setters y toString.
 @NoArgsConstructor //Esta anotación genera un constructor sin argumentos.
 @AllArgsConstructor //Esta anotación genera un constructor que acepta todos los atributos de la clase como argumentos.
-public class Conversacion {
+public class Consulta {
     @Id
     private Integer id;
     private Integer id_usuario;
