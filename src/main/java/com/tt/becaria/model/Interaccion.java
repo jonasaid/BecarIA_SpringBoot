@@ -18,5 +18,6 @@ public class Interaccion {
     private Integer id_consulta;
     private String pregunta;
     private String respuesta;
+    private String titulo_contexto;
     private LocalDateTime fecha_hora;
 }
