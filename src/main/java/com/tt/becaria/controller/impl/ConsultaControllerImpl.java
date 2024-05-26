@@ -85,6 +85,8 @@ public class ConsultaControllerImpl implements ConsultaController {
             Consulta consulta = new Consulta();
             consulta.setId(Integer.parseInt(mapa.get("id").toString()));
             consulta.setId_usuario(Integer.parseInt(mapa.get("id_usuario").toString()));
+            consulta.setTitulo(mapa.get("titulo").toString());
+            consulta.setVer(Boolean.parseBoolean(mapa.get("ver").toString()));
             consulta.setFecha_hora((LocalDateTime) mapa.get("fecha_hora"));
             consultas.add(consulta);
         }
@@ -102,8 +104,10 @@ public class ConsultaControllerImpl implements ConsultaController {
         Map<String, Object> dataConsulta = new HashMap<>();
         Map<String, Object> whereConsulta = new HashMap<>();
 
-        dataConsulta.put("id_usuario", consulta.getId_usuario());
-        dataConsulta.put("fecha_hora", consulta.getFecha_hora());
+        consulta.setVer(consulta.isVer());
+
+        dataConsulta.put("titulo", consulta.getTitulo());
+        dataConsulta.put("ver", consulta.isVer());
 
         whereConsulta.put("id", consulta.getId());
 

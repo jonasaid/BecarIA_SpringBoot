@@ -150,6 +150,9 @@ public class DbDriver {
 
         query.append(values).append(")");
 
+        // Imprimir el query SQL completo
+        System.out.println("SQL Query to be executed: " + query.toString());
+
         try {
             PreparedStatement psql = connection.prepareStatement(query.toString());
             int total = psql.executeUpdate();
